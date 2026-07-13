@@ -1,209 +1,250 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useSearchParams } from 'react-router-dom';
-import { 
-  Users, 
-  School, 
-  UserCheck, 
-  CheckCircle, 
-  CheckCircle2, 
-  AlertCircle, 
-  ShieldCheck, 
-  ChevronRight, 
-  LayoutGrid, 
-  Plus, 
-  Upload, 
-  Search, 
-  Trash2, 
-  Edit3, 
-  FileSpreadsheet, 
-  X, 
-  ChevronDown, 
-  ShieldAlert, 
-  RefreshCw, 
-  Cpu, 
-  Info
-} from 'lucide-react';
+import React from "react";
+import {
+  Users,
+  School,
+  UserCheck,
+  CheckCircle2,
+  AlertCircle,
+  ChevronRight,
+  ShieldAlert,
+  RefreshCw,
+  Cpu,
+} from "lucide-react";
 
-// =========================================================================
-// SUB-COMPONENT: OVERVIEW PANEL
-// =========================================================================
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 const OverviewPanel = ({ stats, loading, error, onRefresh, setActiveTab }) => {
   const statCards = [
     {
-      title: 'Total Students',
+      title: "Total Students",
       value: stats.totalStudents,
-      description: 'Registered student database',
+      description: "Registered student database",
       icon: Users,
-      textColor: 'text-blue-400',
-      tab: 'students'
+      color: "text-indigo-400",
+      bg: "bg-indigo-500/10",
+      border: "border-indigo-500/20",
+      action: () => setActiveTab("students"),
     },
     {
-      title: 'Total Teachers',
+      title: "Total Teachers",
       value: stats.totalTeachers,
-      description: 'Available exam invigilators',
-      icon: ShieldCheck,
-      textColor: 'text-emerald-400',
-      tab: 'teachers'
-    },
-    {
-      title: 'Total Classrooms',
-      value: stats.totalClassrooms,
-      description: 'Configured examination halls',
-      icon: School,
-      textColor: 'text-purple-400',
-      tab: 'classrooms'
-    },
-    {
-      title: 'Total Seat Capacity',
-      value: stats.totalCapacity,
-      description: 'Total available seat pool',
-      icon: LayoutGrid,
-      textColor: 'text-amber-400',
-      tab: 'classrooms'
-    },
-    {
-      title: 'Allocated Seats',
-      value: stats.allocatedSeats,
-      description: 'Seats assigned for current exam',
+      description: "Active invigilators pool",
       icon: UserCheck,
-      textColor: 'text-indigo-400',
-      tab: 'view-allocations'
+      color: "text-purple-400",
+      bg: "bg-purple-500/10",
+      border: "border-purple-500/20",
+      action: () => setActiveTab("teachers"),
     },
     {
-      title: 'Available Seats',
-      value: stats.availableSeats,
-      description: 'Unused seat capacity',
-      icon: CheckCircle,
-      textColor: 'text-cyan-400',
-      tab: 'classrooms'
-    }
+      title: "Classrooms",
+      value: stats.totalClassrooms,
+      description: "Available exam halls",
+      icon: School,
+      color: "text-emerald-450",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+      action: () => setActiveTab("classrooms"),
+    },
+    {
+      title: "Total Capacity",
+      value: stats.totalCapacity,
+      description: "Max simultaneous seatings",
+      icon: CheckCircle2,
+      color: "text-sky-400",
+      bg: "bg-sky-500/10",
+      border: "border-sky-500/20",
+    },
   ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-indigo-650/35 border-t-indigo-500 rounded-full animate-spin" />
-          <p className="text-slate-400 text-sm animate-pulse">Loading dashboard statistics...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-400px gap-3">
+        <div className="w-10 h-10 border-4 border-indigo-650/30 border-t-indigo-550 rounded-full animate-spin" />
+        <span className="text-slate-400 text-sm font-medium tracking-wide">
+          Aggregating statistics...
+        </span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/20 text-red-300 p-6 rounded-2xl flex items-center gap-3">
-        <AlertCircle className="text-red-400 shrink-0" size={24} />
-        <div>
-          <h4 className="font-bold">Error Loading Dashboard</h4>
-          <p className="text-sm text-red-400/80">{error}</p>
+      <div className="bg-destructive/10 border border-destructive/20 text-destructive-foreground p-5 rounded-2xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <AlertCircle size={20} className="shrink-0" />
+          <span className="text-sm font-semibold">{error}</span>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRefresh}
+          className="hover:bg-destructive/20 hover:text-white"
+        >
+          <RefreshCw size={14} className="mr-2" /> Retry
+        </Button>
       </div>
     );
   }
 
+  const utilizationRate =
+    stats.totalCapacity > 0
+      ? Math.round((stats.totalStudents / stats.totalCapacity) * 100)
+      : 0;
+
+  const isOverCapacity = utilizationRate > 100;
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Quick metrics grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {statCards.map((card, i) => {
-          const Icon = card.icon;
+    <div className="space-y-6 animate-fade-in">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statCards.map((stat, idx) => {
+          const Icon = stat.icon;
           return (
-            <div 
-              key={i} 
-              onClick={() => setActiveTab(card.tab)}
-              className="glass glow-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-700 cursor-pointer shadow-md shadow-slate-950/20 flex flex-col justify-between"
+            <Card
+              key={idx}
+              className={`glass glow-card border-slate-800 shadow-xl overflow-hidden transition-all duration-300 ${stat.action ? "hover:-translate-y-1 hover:border-slate-700 cursor-pointer" : ""}`}
+              onClick={stat.action}
             >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">{card.title}</span>
-                <div className={`p-2.5 rounded-xl bg-slate-950/80 border border-slate-850/80 ${card.textColor}`}>
-                  <Icon size={18} />
+              <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xs font-extrabold text-slate-500 uppercase tracking-widest">
+                      {stat.title}
+                    </CardTitle>
+                    <div className="text-3xl font-black text-slate-100 tracking-tight">
+                      {stat.value || 0}
+                    </div>
+                  </div>
+                  <div
+                    className={`p-3 rounded-xl border ${stat.bg} ${stat.border} ${stat.color} shadow-inner`}
+                  >
+                    <Icon size={24} strokeWidth={2.5} />
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-3xl font-extrabold text-white tracking-tight">{card.value}</span>
-                <span className="text-xs text-slate-400 mt-2 font-medium">{card.description}</span>
-              </div>
-            </div>
+
+                <div className="flex items-center justify-between mt-auto">
+                  <CardDescription className="text-xs font-medium text-slate-400">
+                    {stat.description}
+                  </CardDescription>
+                  {stat.action && (
+                    <div className="w-6 h-6 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-colors">
+                      <ChevronRight size={12} strokeWidth={3} />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
-      {/* Progress Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Capacity Progress */}
-        <div className="glass rounded-2xl p-6 border border-slate-800/60 lg:col-span-2 space-y-6 shadow-md">
-          <h3 className="text-sm font-bold text-slate-350 uppercase tracking-widest border-b border-slate-850 pb-3">Seating Capacity Utilization</h3>
-          <div className="space-y-6">
+      <Card className="glass glow-card overflow-hidden rounded-3xl border-slate-800 shadow-2xl relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px]" />
+
+        <CardHeader className="p-8 border-b border-slate-800/60 flex flex-row justify-between items-center bg-slate-900/40 space-y-0">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-650 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-600/30">
+              <Cpu size={20} />
+            </div>
             <div>
-              <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2">
-                <span>SEATING RATIO</span>
-                <span>{stats.totalCapacity > 0 ? Math.round((stats.allocatedSeats / stats.totalCapacity) * 100) : 0}%</span>
+              <CardTitle className="text-lg font-bold text-slate-100 tracking-wide">
+                System Capacity Overview
+              </CardTitle>
+              <CardDescription className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                Real-time Resource Allocation
+              </CardDescription>
+            </div>
+          </div>
+          {isOverCapacity && (
+            <div className="flex items-center gap-2 text-xs font-bold bg-destructive/10 text-destructive-foreground border border-destructive/20 px-3 py-1.5 rounded-full uppercase tracking-wider">
+              <ShieldAlert size={14} /> Critical Overload
+            </div>
+          )}
+        </CardHeader>
+
+        <CardContent className="p-8">
+          <div className="space-y-6 max-w-4xl">
+            <div className="flex justify-between items-end">
+              <div>
+                <span className="text-sm font-semibold text-slate-300">
+                  Total Infrastructure Utilization
+                </span>
+                <p className="text-xs text-slate-500 mt-1">
+                  Comparing total registered students against available seating
+                  capacity
+                </p>
               </div>
-              <div className="w-full bg-slate-950 rounded-full h-3.5 border border-slate-850 overflow-hidden">
-                <div 
-                  className="bg-indigo-650 h-full rounded-full shadow-lg shadow-indigo-650/40 transition-all duration-1000"
-                  style={{ width: `${stats.totalCapacity > 0 ? (stats.allocatedSeats / stats.totalCapacity) * 100 : 0}%` }}
+              <div className="text-right">
+                <span
+                  className={`text-3xl font-black ${isOverCapacity ? "text-destructive-foreground" : "text-emerald-450"}`}
+                >
+                  {utilizationRate}%
+                </span>
+              </div>
+            </div>
+
+            <div className="h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-800/80 shadow-inner p-0.5 relative">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${
+                  isOverCapacity
+                    ? "bg-linear-to-r from-orange-500 to-red-500"
+                    : "bg-linear-to-r from-emerald-500 to-teal-400"
+                }`}
+                style={{ width: `${Math.min(utilizationRate, 100)}%` }}
+              >
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+              </div>
+            </div>
+
+            <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest pt-2 border-t border-slate-800/60">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                <span>{stats.totalStudents} Registered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>{stats.totalCapacity} Capacity</span>
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              </div>
+            </div>
+
+            {isOverCapacity && (
+              <div className="mt-6 bg-destructive/10 border border-destructive/20 p-5 rounded-2xl flex items-start gap-3">
+                <AlertCircle
+                  size={20}
+                  className="text-destructive-foreground shrink-0 mt-0.5"
                 />
+                <div>
+                  <h4 className="text-sm font-bold text-destructive-foreground">
+                    Action Required: Insufficient Capacity
+                  </h4>
+                  <p className="text-xs text-destructive-foreground/80 mt-1 leading-relaxed">
+                    There are currently more students registered than available
+                    seats in the system. You must add more classrooms or
+                    reconfigure seating capacities before attempting to run the
+                    allocation wizard.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab("classrooms")}
+                    className="mt-3 text-xs hover:bg-destructive/20"
+                  >
+                    Manage Classrooms
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center pt-2">
-              <div className="p-3.5 bg-slate-950/30 border border-slate-850/80 rounded-xl">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Allocated</span>
-                <span className="text-base font-bold text-indigo-400">{stats.allocatedSeats}</span>
-              </div>
-              <div className="p-3.5 bg-slate-950/30 border border-slate-850/80 rounded-xl">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Available</span>
-                <span className="text-base font-bold text-emerald-400">{stats.availableSeats}</span>
-              </div>
-              <div className="p-3.5 bg-slate-950/30 border border-slate-850/80 rounded-xl">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Capacity</span>
-                <span className="text-base font-bold text-slate-300">{stats.totalCapacity}</span>
-              </div>
-              <div className="p-3.5 bg-slate-950/30 border border-slate-850/80 rounded-xl">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Halls</span>
-                <span className="text-base font-bold text-purple-400">{stats.totalClassrooms}</span>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
-
-        {/* Quick Tips */}
-        <div className="glass rounded-2xl p-6 border border-slate-800/60 space-y-4 shadow-md flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-slate-350 uppercase tracking-widest border-b border-slate-850 pb-3 mb-3">Quick Actions</h3>
-            <p className="text-xs text-slate-500 leading-relaxed mb-4">Initialize seat placements using our interleaving generator system, or view schedules.</p>
-            <div className="space-y-2">
-              <button 
-                onClick={() => setActiveTab('allocate')}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-850 text-slate-300 hover:text-white hover:bg-slate-900 transition-colors text-xs font-semibold"
-              >
-                <span>Seat Allocation Wizard</span>
-                <ChevronRight size={14} className="text-indigo-400" />
-              </button>
-              <button 
-                onClick={() => setActiveTab('view-allocations')}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-850 text-slate-300 hover:text-white hover:bg-slate-900 transition-colors text-xs font-semibold"
-              >
-                <span>Invigilator Schedules</span>
-                <ChevronRight size={14} className="text-indigo-400" />
-              </button>
-            </div>
-          </div>
-          <button 
-            onClick={onRefresh} 
-            className="w-full mt-4 flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-705 border border-slate-705 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition-all"
-          >
-            <RefreshCw size={12} />
-            <span>Reload Statistics</span>
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
-
 
 export default OverviewPanel;

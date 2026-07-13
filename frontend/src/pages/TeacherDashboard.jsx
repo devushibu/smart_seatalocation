@@ -3,6 +3,10 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { School, Users, AlertCircle, ListOrdered, Calendar } from 'lucide-react';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+
 const TeacherDashboard = () => {
   const { user } = useContext(AuthContext);
   const [data, setData] = useState(null);
@@ -53,8 +57,8 @@ const TeacherDashboard = () => {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-300 p-4 rounded-xl text-sm">
-          <AlertCircle size={18} className="text-red-400 shrink-0" />
+        <div className="flex items-center gap-2 bg-destructive/10 border border-destructive/20 text-destructive-foreground p-4 rounded-xl text-sm">
+          <AlertCircle size={18} className="shrink-0" />
           <span>{error}</span>
         </div>
       )}
@@ -65,7 +69,7 @@ const TeacherDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Room Card */}
-            <div className="glass p-6 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <Card className="glass flex items-center justify-between p-6 rounded-2xl shadow-none">
               <div>
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block">ASSIGNED ROOM</span>
                 <span className="text-3xl font-black text-white mt-1 block">{data.roomNumber}</span>
@@ -76,10 +80,10 @@ const TeacherDashboard = () => {
               <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-indigo-400">
                 <School size={30} />
               </div>
-            </div>
+            </Card>
 
             {/* Students Count Card */}
-            <div className="glass p-6 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <Card className="glass flex items-center justify-between p-6 rounded-2xl shadow-none">
               <div>
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block">STUDENTS ON DUTY</span>
                 <span className="text-3xl font-black text-white mt-1 block">{data.studentsCount} Students</span>
@@ -88,51 +92,50 @@ const TeacherDashboard = () => {
               <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-emerald-450">
                 <Users size={30} />
               </div>
-            </div>
-
+            </Card>
           </div>
 
           {/* Students list for this classroom */}
-          <div className="glass rounded-2xl border border-slate-800/60 overflow-hidden shadow-lg">
-            <div className="px-6 py-5 border-b border-slate-800/60 flex items-center justify-between">
-              <h3 className="font-bold text-slate-100 tracking-wide text-base flex items-center gap-2">
+          <Card className="glass rounded-2xl overflow-hidden shadow-lg border-slate-800/60">
+            <CardHeader className="px-6 py-5 border-b border-slate-800/60 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="font-bold text-slate-100 tracking-wide text-base flex items-center gap-2">
                 <ListOrdered size={18} className="text-indigo-400" />
                 <span>Room Student Seating Chart</span>
-              </h3>
-            </div>
+              </CardTitle>
+            </CardHeader>
 
-            {data.students.length === 0 ? (
-              <p className="text-xs text-slate-600 py-12 text-center">No students allocated to this classroom yet.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-950/60 border-b border-slate-800/80 text-xs font-semibold text-slate-450 uppercase tracking-wider">
-                      <th className="px-6 py-4">Seat No</th>
-                      <th className="px-6 py-4">Register No</th>
-                      <th className="px-6 py-4">Name</th>
-                      <th className="px-6 py-4">Department</th>
-                      <th className="px-6 py-4">Semester</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-850/60 text-sm text-slate-350">
+            <CardContent className="p-0">
+              {data.students.length === 0 ? (
+                <p className="text-xs text-slate-600 py-12 text-center">No students allocated to this classroom yet.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-950/60 border-b border-slate-800/80 hover:bg-slate-950/60">
+                      <TableHead className="font-semibold text-slate-450 uppercase tracking-wider">Seat No</TableHead>
+                      <TableHead className="font-semibold text-slate-450 uppercase tracking-wider">Register No</TableHead>
+                      <TableHead className="font-semibold text-slate-450 uppercase tracking-wider">Name</TableHead>
+                      <TableHead className="font-semibold text-slate-450 uppercase tracking-wider">Department</TableHead>
+                      <TableHead className="font-semibold text-slate-450 uppercase tracking-wider">Semester</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="text-sm text-slate-350">
                     {data.students.map((alloc) => (
-                      <tr key={alloc._id} className="hover:bg-slate-900/40 transition-colors">
-                        <td className="px-6 py-4 font-mono font-bold text-indigo-400">Seat {alloc.seatNumber}</td>
-                        <td className="px-6 py-4 font-mono text-slate-300 font-semibold">{alloc.registerNumber}</td>
-                        <td className="px-6 py-4 font-medium text-slate-200">{alloc.student?.name || 'N/A'}</td>
-                        <td className="px-6 py-4">{alloc.department}</td>
-                        <td className="px-6 py-4">{alloc.semester}</td>
-                      </tr>
+                      <TableRow key={alloc._id} className="hover:bg-slate-900/40 transition-colors border-b border-slate-850/60">
+                        <TableCell className="font-mono font-bold text-indigo-400">Seat {alloc.seatNumber}</TableCell>
+                        <TableCell className="font-mono text-slate-300 font-semibold">{alloc.registerNumber}</TableCell>
+                        <TableCell className="font-medium text-slate-200">{alloc.student?.name || 'N/A'}</TableCell>
+                        <TableCell>{alloc.department}</TableCell>
+                        <TableCell>{alloc.semester}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-10 flex flex-col items-center justify-center text-center space-y-4 max-w-xl mx-auto shadow-xl">
+        <Card className="bg-slate-900 border-slate-800 rounded-3xl p-10 flex flex-col items-center justify-center text-center space-y-4 max-w-xl mx-auto shadow-xl">
           <div className="bg-indigo-900/40 border border-indigo-500/20 p-4 rounded-full text-indigo-400">
             <School size={36} />
           </div>
@@ -140,7 +143,7 @@ const TeacherDashboard = () => {
           <p className="text-sm text-slate-500 leading-relaxed">
             You are not currently assigned to any classroom for invigilation. Please wait for the exam administrator to generate the seating chart and allocate your classroom duty.
           </p>
-        </div>
+        </Card>
       )}
     </div>
   );
