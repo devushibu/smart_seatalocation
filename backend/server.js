@@ -35,8 +35,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong on the server!', error: err.message });
 });
 
-// Start listening on port 5000 (or platform assigned port)
-const PORT = process.env.PORT || 5000;
+// Start listening on port 3000 (or platform assigned port)
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
