@@ -5,7 +5,7 @@ import axios from 'axios';
 export const AuthContext = createContext();
 
 // Configure the default root URL path for all Axios HTTP requests
-axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.baseURL = 'http://localhost:3000/api';
 
 export const AuthProvider = ({ children }) => {
   // Setup reactive state variables for logged in user data, active JWT tokens, loading screen overlays, and errors

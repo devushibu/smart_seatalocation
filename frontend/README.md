@@ -1,16 +1,54 @@
-# React + Vite
+# Smart Seat Allocation - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This is the frontend application for the Smart Seat Allocation system, built using React, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
+- **Admin Dashboard**: Manage classrooms, students, teachers, and initiate seat allocations.
+- **Teacher Dashboard**: View assigned invigilation duties and schedules.
+- **Student Dashboard**: View allocated seat details for exams.
+- **Role-Based Authentication**: Secure login and access control for Admins, Teachers, and Students.
+- **Responsive Design**: Styled with Tailwind CSS for optimal viewing on multiple devices.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
+- **React**: UI library for building the user interface.
+- **Vite**: Fast frontend build tool.
+- **Tailwind CSS**: Utility-first CSS framework for styling.
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+Make sure you have Node.js and npm installed on your machine.
 
-## Expanding the Oxlint configuration
+### Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Running the Application
+
+To start the development server:
+```bash
+npm run dev
+```
+The app will be available at `http://localhost:5173`.
+
+### Building for Production
+
+To build the application for production deployment:
+```bash
+npm run build
+```
+This will create a `dist` directory with optimized assets.
+
+## Folder Structure
+- `/src/components`: Reusable UI components (e.g., Layout).
+- `/src/context`: React Context providers (e.g., AuthContext).
+- `/src/pages`: Main page components for different routes and roles.
+- `/src/assets`: Static assets like images.
