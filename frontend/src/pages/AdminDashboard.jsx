@@ -57,9 +57,9 @@ const AdminDashboard = () => {
           setActiveTab={setActiveTab} 
         />
       )}
-      {activeTab === 'students' && <StudentsPanel />}
-      {activeTab === 'teachers' && <TeachersPanel />}
-      {activeTab === 'classrooms' && <ClassroomsPanel />}
+      {activeTab === 'students' && <StudentsPanel onRefresh={fetchStats} />}
+      {activeTab === 'teachers' && <TeachersPanel onRefresh={fetchStats} />}
+      {activeTab === 'classrooms' && <ClassroomsPanel onRefresh={fetchStats} />}
       {activeTab === 'allocate' && <AllocatePanel setActiveTab={setActiveTab} onRefresh={fetchStats} />}
       {activeTab === 'view-allocations' && <ViewAllocationsPanel onRefresh={fetchStats} />}
     </div>

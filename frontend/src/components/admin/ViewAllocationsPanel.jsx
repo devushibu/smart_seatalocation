@@ -37,6 +37,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const ViewAllocationsPanel = ({ onRefresh }) => {
   const [allocations, setAllocations] = useState([]);
@@ -50,6 +56,14 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
   const [activeRoom, setActiveRoom] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [assignTeacher, setAssignTeacher] = useState("");
+
+  const [isRemoveTeacherModalOpen, setIsRemoveTeacherModalOpen] = useState(false);
+  const [teacherAssignmentToRemove, setTeacherAssignmentToRemove] = useState(null);
+  
+  const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
+  
+  const [isDeleteRoomAllocationModalOpen, setIsDeleteRoomAllocationModalOpen] = useState(false);
+  const [roomAllocationToDelete, setRoomAllocationToDelete] = useState(null);
 
   useEffect(() => {
     fetchAllocations();
@@ -110,25 +124,27 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
     }
   };
 
-  const handleRemoveTeacherAssignment = async (id) => {
-    if (!window.confirm("Remove this invigilator assignment?")) return;
+  const confirmRemoveTeacherAssignment = async () => {
+    if (!teacherAssignmentToRemove) return;
     try {
-      await axios.delete(`/allocations/teacher/${id}`);
+      await axios.delete(`/allocations/teacher/${teacherAssignmentToRemove}`);
       setSuccess("Invigilator duty assignment removed.");
       fetchTeacherAssignments();
     } catch (err) {
       console.error(err);
       setError("Failed to remove assignment");
+    } finally {
+      setIsRemoveTeacherModalOpen(false);
+      setTeacherAssignmentToRemove(null);
     }
   };
 
-  const handleClearAllAllocations = async () => {
-    if (
-      !window.confirm(
-        "Delete ALL seat allocations and teacher assignments? This cannot be undone.",
-      )
-    )
-      return;
+  const handleRemoveTeacherClick = (id) => {
+    setTeacherAssignmentToRemove(id);
+    setIsRemoveTeacherModalOpen(true);
+  };
+
+  const confirmClearAllAllocations = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -143,22 +159,22 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
       setError("Failed to clear allocations");
     } finally {
       setLoading(false);
+      setIsClearAllModalOpen(false);
     }
   };
 
-  const handleDeleteRoomAllocation = async (roomNum) => {
-    if (
-      !window.confirm(
-        `Delete all allocations and invigilators for room ${roomNum}?`,
-      )
-    )
-      return;
+  const handleClearAllClick = () => {
+    setIsClearAllModalOpen(true);
+  };
+
+  const confirmDeleteRoomAllocation = async () => {
+    if (!roomAllocationToDelete) return;
     try {
       setLoading(true);
       setError(null);
-      await axios.delete(`/allocations/room/${roomNum}`);
-      setSuccess(`Allocations for room ${roomNum} deleted successfully!`);
-      if (activeRoom === roomNum) setActiveRoom("");
+      await axios.delete(`/allocations/room/${roomAllocationToDelete}`);
+      setSuccess(`Allocations for room ${roomAllocationToDelete} deleted successfully!`);
+      if (activeRoom === roomAllocationToDelete) setActiveRoom("");
       fetchAllocations();
       fetchTeacherAssignments();
       onRefresh();
@@ -167,7 +183,14 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
       setError(`Failed to delete room allocations`);
     } finally {
       setLoading(false);
+      setIsDeleteRoomAllocationModalOpen(false);
+      setRoomAllocationToDelete(null);
     }
+  };
+
+  const handleDeleteRoomAllocationClick = (roomNum) => {
+    setRoomAllocationToDelete(roomNum);
+    setIsDeleteRoomAllocationModalOpen(true);
   };
 
   const uniqueRooms = Array.from(
@@ -201,7 +224,7 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
         {uniqueRooms.length > 0 && (
           <Button
             variant="destructive"
-            onClick={handleClearAllAllocations}
+            onClick={handleClearAllClick}
             className="flex items-center gap-2 self-start md:self-auto"
           >
             <Trash2 size={14} />
@@ -377,7 +400,7 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteRoomAllocation(room);
+                          handleDeleteRoomAllocationClick(room);
                         }}
                         className="h-6 w-6 text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
                       >
@@ -542,7 +565,7 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
                         variant="ghost"
                         size="icon"
                         onClick={() =>
-                          handleRemoveTeacherAssignment(
+                          handleRemoveTeacherClick(
                             roomTeacherObj(activeRoom)._id,
                           )
                         }
@@ -558,6 +581,80 @@ const ViewAllocationsPanel = ({ onRefresh }) => {
           )}
         </div>
       )}
+
+      {/* Modals */}
+      <Dialog open={isRemoveTeacherModalOpen} onOpenChange={setIsRemoveTeacherModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={20} />
+              Confirm Removal
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to remove this invigilator assignment?
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsRemoveTeacherModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmRemoveTeacherAssignment}>
+              Remove
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isClearAllModalOpen} onOpenChange={setIsClearAllModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={20} />
+              Confirm Clear All
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete ALL seat allocations and teacher assignments? This cannot be undone.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsClearAllModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmClearAllAllocations}>
+              Clear All
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteRoomAllocationModalOpen} onOpenChange={setIsDeleteRoomAllocationModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={20} />
+              Confirm Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete all allocations and invigilators for room {roomAllocationToDelete}?
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsDeleteRoomAllocationModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteRoomAllocation}>
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };

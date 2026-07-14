@@ -42,7 +42,7 @@ import { Label } from "@/components/ui/label";
 // =========================================================================
 // SUB-COMPONENT: TEACHER MANAGEMENT
 // =========================================================================
-const TeachersPanel = () => {
+const TeachersPanel = ({ onRefresh }) => {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -53,6 +53,8 @@ const TeachersPanel = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentTeacher, setCurrentTeacher] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [teacherToDelete, setTeacherToDelete] = useState(null);
 
   const [name, setName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
@@ -95,6 +97,7 @@ const TeachersPanel = () => {
       setIsAddModalOpen(false);
       setSuccessMsg("Teacher added successfully!");
       fetchTeachers();
+      if (onRefresh) onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add teacher");
     }
@@ -117,26 +120,31 @@ const TeachersPanel = () => {
       setCurrentTeacher(null);
       setSuccessMsg("Teacher details updated successfully!");
       fetchTeachers();
+      if (onRefresh) onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update teacher");
     }
   };
 
-  const handleDeleteTeacher = async (id) => {
-    if (
-      !window.confirm(
-        "Delete this teacher? This clears any invigilation assignment.",
-      )
-    )
-      return;
+  const confirmDeleteTeacher = async () => {
+    if (!teacherToDelete) return;
     try {
-      await axios.delete(`/teachers/${id}`);
+      await axios.delete(`/teachers/${teacherToDelete}`);
       setSuccessMsg("Teacher deleted successfully");
       fetchTeachers();
+      if (onRefresh) onRefresh();
     } catch (err) {
       console.error(err);
       setError("Failed to delete teacher");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setTeacherToDelete(null);
     }
+  };
+
+  const handleDeleteClick = (id) => {
+    setTeacherToDelete(id);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCsvUpload = async (e) => {
@@ -160,6 +168,7 @@ const TeachersPanel = () => {
       const fileInput = document.getElementById("teacher-csv-input");
       if (fileInput) fileInput.value = "";
       fetchTeachers();
+      if (onRefresh) onRefresh();
     } catch (err) {
       console.error(err);
       setError("Error uploading CSV");
@@ -327,7 +336,7 @@ const TeachersPanel = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteTeacher(teacher._id)}
+                        onClick={() => handleDeleteClick(teacher._id)}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -447,6 +456,29 @@ const TeachersPanel = () => {
               </Button>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={20} />
+              Confirm Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this teacher? This action cannot be undone and clears any invigilation assignment.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteTeacher}>
+              Delete Teacher
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

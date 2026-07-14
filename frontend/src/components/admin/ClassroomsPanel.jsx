@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 // =========================================================================
 // SUB-COMPONENT: CLASSROOM MANAGEMENT
 // =========================================================================
-const ClassroomsPanel = () => {
+const ClassroomsPanel = ({ onRefresh }) => {
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -41,6 +41,8 @@ const ClassroomsPanel = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentRoom, setCurrentRoom] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState(null);
 
   const [roomNumber, setRoomNumber] = useState("");
   const [building, setBuilding] = useState("");
@@ -88,6 +90,7 @@ const ClassroomsPanel = () => {
       setIsAddModalOpen(false);
       setSuccessMsg("Classroom added successfully!");
       fetchClassrooms();
+      if (onRefresh) onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add classroom");
     }
@@ -116,26 +119,31 @@ const ClassroomsPanel = () => {
       setCurrentRoom(null);
       setSuccessMsg("Classroom details updated successfully!");
       fetchClassrooms();
+      if (onRefresh) onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update classroom");
     }
   };
 
-  const handleDeleteRoom = async (id) => {
-    if (
-      !window.confirm(
-        "Delete classroom? This clears seat and teacher assignments for this room.",
-      )
-    )
-      return;
+  const confirmDeleteRoom = async () => {
+    if (!roomToDelete) return;
     try {
-      await axios.delete(`/classrooms/${id}`);
+      await axios.delete(`/classrooms/${roomToDelete}`);
       setSuccessMsg("Classroom deleted successfully");
       fetchClassrooms();
+      if (onRefresh) onRefresh();
     } catch (err) {
       console.error(err);
       setError("Failed to delete classroom");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setRoomToDelete(null);
     }
+  };
+
+  const handleDeleteClick = (id) => {
+    setRoomToDelete(id);
+    setIsDeleteModalOpen(true);
   };
 
   return (
@@ -240,7 +248,7 @@ const ClassroomsPanel = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteRoom(room._id)}
+                        onClick={() => handleDeleteClick(room._id)}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -412,6 +420,29 @@ const ClassroomsPanel = () => {
               </Button>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={20} />
+              Confirm Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this classroom? This action cannot be undone and clears seat and teacher assignments for this room.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteRoom}>
+              Delete Classroom
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
