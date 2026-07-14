@@ -42,7 +42,7 @@ import { Label } from "@/components/ui/label";
 // =========================================================================
 // SUB-COMPONENT: STUDENT MANAGEMENT
 // =========================================================================
-const StudentsPanel = () => {
+const StudentsPanel = ({ onRefresh }) => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -55,6 +55,8 @@ const StudentsPanel = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState(null);
 
   const [name, setName] = useState("");
   const [registerNumber, setRegisterNumber] = useState("");
@@ -106,6 +108,7 @@ const StudentsPanel = () => {
       setIsAddModalOpen(false);
       setSuccessMsg("Student added successfully!");
       fetchStudents();
+      if (onRefresh) onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add student");
     }
@@ -124,26 +127,31 @@ const StudentsPanel = () => {
       setCurrentStudent(null);
       setSuccessMsg("Student details updated successfully!");
       fetchStudents();
+      if (onRefresh) onRefresh();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update student");
     }
   };
 
-  const handleDeleteStudent = async (id) => {
-    if (
-      !window.confirm(
-        "Delete this student? This removes any active seat allocation.",
-      )
-    )
-      return;
+  const confirmDeleteStudent = async () => {
+    if (!studentToDelete) return;
     try {
-      await axios.delete(`/students/${id}`);
+      await axios.delete(`/students/${studentToDelete}`);
       setSuccessMsg("Student deleted successfully");
       fetchStudents();
+      if (onRefresh) onRefresh();
     } catch (err) {
       console.error(err);
       setError("Failed to delete student");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setStudentToDelete(null);
     }
+  };
+
+  const handleDeleteClick = (id) => {
+    setStudentToDelete(id);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCsvUpload = async (e) => {
@@ -169,6 +177,7 @@ const StudentsPanel = () => {
       const fileInput = document.getElementById("student-csv-file-input");
       if (fileInput) fileInput.value = "";
       fetchStudents();
+      if (onRefresh) onRefresh();
     } catch (err) {
       console.error(err);
       setError("Error uploading CSV");
@@ -377,7 +386,7 @@ const StudentsPanel = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteStudent(student._id)}
+                        onClick={() => handleDeleteClick(student._id)}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -501,6 +510,29 @@ const StudentsPanel = () => {
               </Button>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle size={20} />
+              Confirm Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this student? This action cannot be undone and will remove any active seat allocation.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteStudent}>
+              Delete Student
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
