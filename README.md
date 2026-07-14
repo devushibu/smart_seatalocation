@@ -45,7 +45,7 @@ A premium, full-stack MERN application designed to automate and streamline the p
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/theGautham/smart_seatalocation.git
+   git clone https://github.com/devushibu/smart_seatalocation.git
    cd smart_seatalocation
    ```
 
