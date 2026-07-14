@@ -64,23 +64,23 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background glowing decorations */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-650/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/5 dark:bg-indigo-650/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <Card className="w-full max-w-md glass glow-card relative z-10 shadow-2xl border-slate-800/80 bg-slate-950/40">
+      <Card className="w-full max-w-md bg-card text-card-foreground border-border relative z-10 shadow-2xl">
         <CardHeader className="flex flex-col items-center mb-2 text-center pb-2">
           <div className="bg-indigo-600 p-3.5 rounded-2xl text-white shadow-lg shadow-indigo-600/30 mb-4 animate-bounce">
             <Shield size={28} />
           </div>
-          <CardTitle className="text-2xl font-extrabold tracking-wide text-white">Smart Exam System</CardTitle>
-          <CardDescription className="text-slate-400 mt-1">Seat Allocation & Hall Management</CardDescription>
+          <CardTitle className="text-2xl font-extrabold tracking-wide text-foreground">Smart Exam System</CardTitle>
+          <CardDescription className="text-muted-foreground mt-1">Seat Allocation & Hall Management</CardDescription>
         </CardHeader>
         
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-950/80 border border-slate-800/80 rounded-2xl h-14 p-1 mb-6">
+            <TabsList className="grid w-full grid-cols-3 bg-muted border border-border rounded-2xl h-14 p-1 mb-6">
               <TabsTrigger value="student" className="rounded-xl data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                 <div className="flex flex-col items-center gap-1">
                   <GraduationCap size={14} />
@@ -103,7 +103,7 @@ const Login = () => {
 
             {/* Error message */}
             {error && (
-              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-2xl text-sm mb-6 animate-pulse">
+              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-2xl text-sm mb-6 animate-pulse">
                 <AlertCircle size={16} className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -111,9 +111,9 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5 mt-2">
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{getTabLabel()}</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{getTabLabel()}</Label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-muted-foreground/70">
                     {getTabIcon()}
                   </span>
                   <Input 
@@ -121,16 +121,16 @@ const Login = () => {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={`Enter ${getTabLabel().toLowerCase()}`}
-                    className="pl-10 h-12 bg-slate-950/60 border-slate-800 focus-visible:ring-indigo-500 rounded-2xl text-white placeholder:text-slate-600"
+                    className="pl-10 h-12 bg-background border-border focus-visible:ring-indigo-500 rounded-2xl text-foreground placeholder:text-muted-foreground/50"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Password</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Password</Label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-muted-foreground/70">
                     <Lock size={16} />
                   </span>
                   <Input 
@@ -138,7 +138,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="pl-10 h-12 bg-slate-950/60 border-slate-800 focus-visible:ring-indigo-500 rounded-2xl text-white placeholder:text-slate-600"
+                    className="pl-10 h-12 bg-background border-border focus-visible:ring-indigo-500 rounded-2xl text-foreground placeholder:text-muted-foreground/50"
                     required
                   />
                 </div>
@@ -147,7 +147,7 @@ const Login = () => {
               <Button 
                 type="submit" 
                 disabled={submitting}
-                className="w-full h-14 mt-6 bg-indigo-650 hover:bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/25 transition-all duration-300"
+                className="w-full h-14 mt-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-600/25 transition-all duration-300"
               >
                 {submitting ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -161,7 +161,7 @@ const Login = () => {
             </form>
           </Tabs>
         </CardContent>
-        <CardFooter className="flex justify-center border-t border-slate-800/60 pt-6 text-xs text-slate-500 text-center">
+        <CardFooter className="flex justify-center border-t border-border pt-6 text-xs text-muted-foreground text-center">
           {activeTab === 'student' && (
             <p>Students can log in using their Name as username and Register Number as the password.</p>
           )}

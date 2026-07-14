@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 
 // Pages import
@@ -70,51 +71,53 @@ const RootRedirect = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Admin Protected Routes */}
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Admin Protected Routes */}
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
 
-            {/* Teacher Protected Routes */}
-            <Route
-              path="/teacher/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['teacher']}>
-                  <TeacherDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Teacher Protected Routes */}
+              <Route
+                path="/teacher/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher']}>
+                    <TeacherDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Student Protected Routes */}
-            <Route
-              path="/student/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['student']}>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              }
-            />
+              {/* Student Protected Routes */}
+              <Route
+                path="/student/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Fallbacks */}
-            <Route path="/" element={<RootRedirect />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Layout>
-      </Router>
-    </AuthProvider>
+              {/* Fallbacks */}
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Layout>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

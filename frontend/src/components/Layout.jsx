@@ -14,6 +14,8 @@ import {
   Shield
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import Footer from './Footer';
+import ThemeToggle from './ThemeToggle';
 
 const Layout = ({ children }) => {
   const { user, logout } = useContext(AuthContext);
@@ -35,33 +37,47 @@ const Layout = ({ children }) => {
     { name: 'View Seat Allocation', path: '/admin/dashboard?tab=view-allocations', icon: Grid },
   ];
 
-  if (!user) return <>{children}</>;
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col justify-between relative">
+        <div className="absolute top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+        <div className="flex-1 flex flex-col">
+          {children}
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // Simple clean navbar for Student & Teacher
   if (user.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col">
-        <header className="glass sticky top-0 z-40 px-6 py-4 flex items-center justify-between shadow-lg shadow-indigo-950/20">
+      <div className="min-h-screen bg-background text-foreground flex flex-col">
+        <header className="glass sticky top-0 z-40 px-6 py-4 flex items-center justify-between shadow-sm border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="bg-indigo-650 p-2 rounded-lg text-white shadow-md shadow-indigo-600/35">
+            <div className="bg-indigo-600 p-2 rounded-lg text-white shadow-md shadow-indigo-600/30">
               <School size={22} />
             </div>
-            <h1 className="font-bold text-lg tracking-wider text-slate-100 uppercase">
+            <h1 className="font-bold text-lg tracking-wider text-foreground uppercase">
               Smart Exam Portal
             </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/50">
-              <User size={16} className="text-indigo-400" />
-              <span className="text-sm font-medium text-slate-300">{user.name}</span>
-              <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full capitalize font-semibold">
+          <div className="flex items-center gap-3">
+            {/* User pill */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border">
+              <User size={16} className="text-indigo-500" />
+              <span className="text-sm font-medium text-foreground">{user.name}</span>
+              <span className="text-xs bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 px-2 py-0.5 rounded-full capitalize font-semibold">
                 {user.role}
               </span>
             </div>
+            <ThemeToggle />
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-red-500/20 hover:text-red-300 text-slate-300 px-4 py-2 rounded-xl text-sm font-medium border border-slate-700 hover:border-red-500/30 transition-all duration-300"
+              className="flex items-center gap-2 hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-300 text-foreground px-4 py-2 rounded-xl text-sm font-medium border border-border hover:border-red-400/50 transition-all duration-300"
             >
               <LogOut size={16} />
               <span>Logout</span>
@@ -71,22 +87,23 @@ const Layout = ({ children }) => {
         <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 animate-fade-in">
           {children}
         </main>
+        <Footer />
       </div>
     );
   }
 
   // Heavy sidebar layout for Admin
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-background text-foreground flex">
       {/* Sidebar for Desktop */}
-      <aside className="hidden lg:flex flex-col w-72 bg-slate-900 border-r border-slate-800 shadow-xl">
-        <div className="p-6 flex items-center gap-3 border-b border-slate-800/60">
+      <aside className="hidden lg:flex flex-col w-72 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-xl">
+        <div className="p-6 flex items-center gap-3 border-b border-sidebar-border">
           <div className="bg-indigo-600 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-600/30">
             <Shield size={24} />
           </div>
           <div>
-            <h2 className="font-bold text-base tracking-wider text-white uppercase">Exam Admin</h2>
-            <span className="text-xs text-indigo-400 font-semibold tracking-wide uppercase">Dashboard Portal</span>
+            <h2 className="font-bold text-base tracking-wider text-sidebar-foreground uppercase">Exam Admin</h2>
+            <span className="text-xs text-indigo-500 dark:text-indigo-400 font-semibold tracking-wide uppercase">Dashboard Portal</span>
           </div>
         </div>
 
@@ -103,10 +120,10 @@ const Layout = ({ children }) => {
                 className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-[1.02]'
-                    : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100 border border-transparent hover:border-slate-800'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground border border-transparent hover:border-sidebar-border'
                 }`}
               >
-                <Icon size={18} className={isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'} />
+                <Icon size={18} className={isActive ? 'text-white' : 'text-sidebar-foreground/60'} />
                 <span>{link.name}</span>
               </Link>
             );
@@ -117,16 +134,16 @@ const Layout = ({ children }) => {
       {/* Mobile Sidebar (Drawer) */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative flex flex-col w-80 bg-slate-900 h-full border-r border-slate-800 shadow-2xl animate-slide-in">
-            <div className="p-6 flex items-center justify-between border-b border-slate-800/60">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <aside className="relative flex flex-col w-80 bg-sidebar text-sidebar-foreground h-full border-r border-sidebar-border shadow-2xl animate-slide-in">
+            <div className="p-6 flex items-center justify-between border-b border-sidebar-border">
               <div className="flex items-center gap-3">
-                <div className="bg-indigo-650 p-2.5 rounded-xl text-white">
+                <div className="bg-indigo-600 p-2.5 rounded-xl text-white">
                   <Shield size={24} />
                 </div>
-                <h2 className="font-bold text-base tracking-wider text-white uppercase">Exam Admin</h2>
+                <h2 className="font-bold text-base tracking-wider text-sidebar-foreground uppercase">Exam Admin</h2>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="p-2 text-slate-400 hover:text-white rounded-lg">
+              <button onClick={() => setSidebarOpen(false)} className="p-2 text-sidebar-foreground/60 hover:text-sidebar-foreground rounded-lg transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -145,7 +162,7 @@ const Layout = ({ children }) => {
                     className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                       isActive
                         ? 'bg-indigo-600 text-white'
-                        : 'text-slate-400 hover:bg-slate-800'
+                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
                     }`}
                   >
                     <Icon size={18} />
@@ -156,7 +173,7 @@ const Layout = ({ children }) => {
             </nav>
 
             {/* Mobile bottom spacer */}
-            <div className="p-4 border-t border-slate-800/60 text-center text-[10px] text-slate-650 font-bold tracking-wider uppercase">
+            <div className="p-4 border-t border-sidebar-border text-center text-[10px] text-sidebar-foreground/50 font-bold tracking-wider uppercase">
               Smart Exam Portal
             </div>
           </aside>
@@ -166,32 +183,33 @@ const Layout = ({ children }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Unified Top Header Bar */}
-        <header className="glass px-6 py-4 flex items-center justify-between border-b border-slate-800/60 sticky top-0 z-30 shadow-sm">
+        <header className="glass px-6 py-4 flex items-center justify-between border-b border-border sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-3">
             <Button 
               variant="outline"
               size="icon"
               onClick={() => setSidebarOpen(true)} 
-              className="lg:hidden text-slate-350 hover:text-white rounded-lg border border-slate-800 bg-slate-900/60 transition-all"
+              className="lg:hidden text-foreground hover:text-foreground rounded-lg border border-border bg-background/60 transition-all"
             >
               <Menu size={20} />
             </Button>
-            <h1 className="lg:hidden font-extrabold text-base tracking-wider text-white uppercase">Exam Admin</h1>
+            <h1 className="lg:hidden font-extrabold text-base tracking-wider text-foreground uppercase">Exam Admin</h1>
           </div>
           
           {/* User profile info & Top Logout Button */}
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950 border border-slate-850/80">
-              <User size={14} className="text-indigo-400" />
-              <span className="text-xs font-bold text-slate-350">{user.name}</span>
-              <span className="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/10 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-muted border border-border">
+              <User size={14} className="text-indigo-500" />
+              <span className="text-xs font-bold text-foreground">{user.name}</span>
+              <span className="text-[9px] bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
                 {user.role}
               </span>
             </div>
+            <ThemeToggle />
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="flex items-center gap-2 bg-slate-850 hover:bg-red-500/20 hover:text-red-300 text-slate-355 px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider border border-slate-800 hover:border-red-550/20 transition-all duration-300 active:scale-[0.97]"
+              className="flex items-center gap-2 hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-300 text-foreground px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider border border-border hover:border-red-400/50 transition-all duration-300 active:scale-[0.97]"
             >
               <LogOut size={14} />
               <span>Logout</span>
@@ -203,6 +221,7 @@ const Layout = ({ children }) => {
         <main className="flex-1 p-6 md:p-8 lg:p-10 overflow-y-auto max-w-[1600px] w-full mx-auto animate-fade-in">
           {children}
         </main>
+        <Footer />
       </div>
     </div>
   );
